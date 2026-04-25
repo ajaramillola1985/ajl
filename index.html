@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d0d0d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Asistente">
+<title>Asistente Personal</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d0d;
+  --bg2: #161616;
+  --bg3: #1f1f1f;
+  --border: rgba(255,255,255,0.08);
+  --border-mid: rgba(255,255,255,0.14);
+  --text: #f0ede8;
+  --text2: #8a8680;
+  --text3: #5a5652;
+  --accent: #c8a96e;
+  --accent2: #8fbcbb;
+  --accent3: #bf616a;
+  --green: #a3be8c;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%; overflow: hidden;
+  background: var(--bg); color: var(--text);
+  font-family: var(--sans); font-size: 15px;
+}
+
+/* ── LAYOUT ── */
+.app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.topbar-title { font-family: var(--serif); font-size: 18px; color: var(--text); letter-spacing: 0.01em; }
+.topbar-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.topbar-icon { width: 36px; height: 36px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border-mid); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+.screens { flex: 1; overflow: hidden; position: relative; }
+.screen { position: absolute; inset: 0; overflow-y: auto; display: none; padding: 0 0 80px; }
+.screen.active { display: block; }
+.screen::-webkit-scrollbar { display: none; }
+
+.nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; background: var(--bg2);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 100;
+}
+.nav-btn {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  padding: 10px 4px 8px; cursor: pointer; background: none; border: none;
+  color: var(--text3); font-family: var(--sans); font-size: 10px; gap: 4px;
+  transition: color 0.15s;
+}
+.nav-btn svg { width: 22px; height: 22px; }
+.nav-btn.active { color: var(--accent); }
+
+/* ── SECTION HEADINGS ── */
+.sh { padding: 20px 20px 10px; }
+.sh h2 { font-family: var(--serif); font-size: 22px; font-style: italic; color: var(--text); }
+.sh p { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+/* ── CARDS ── */
+.card {
+  margin: 0 16px 12px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+}
+.card-row { display: flex; align-items: center; gap: 12px; }
+.card-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.card-icon.gold { background: rgba(200,169,110,0.12); }
+.card-icon.teal { background: rgba(143,188,187,0.12); }
+.card-icon.rose { background: rgba(191,97,106,0.14); }
+.card-icon.green { background: rgba(163,190,140,0.12); }
+.card h3 { font-size: 14px; font-weight: 500; color: var(--text); }
+.card p { font-size: 12px; color: var(--text2); margin-top: 2px; line-height: 1.5; }
+.card .label { font-size: 10px; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; }
+
+/* ── PILLS / BADGES ── */
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; padding: 3px 10px; border-radius: 99px; border: 1px solid var(--border-mid); color: var(--text2); cursor: pointer; }
+.pill.active, .pill:hover { border-color: var(--accent); color: var(--accent); }
+.pills { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px; }
+
+/* ── DIVIDER ── */
+.divider { height: 1px; background: var(--border); margin: 4px 16px 16px; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 20px; border-radius: var(--radius-sm); font-family: var(--sans); font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: #0d0d0d; }
+.btn-ghost { background: var(--bg3); color: var(--text); border: 1px solid var(--border-mid); }
+.btn-full { width: 100%; }
+.btn:disabled { opacity: 0.4; pointer-events: none; }
+
+/* ── INPUTS ── */
+input, textarea, select {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text); font-family: var(--sans);
+  font-size: 14px; padding: 12px 14px; outline: none;
+  transition: border-color 0.15s;
+}
+input:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: none; line-height: 1.6; }
+select option { background: var(--bg2); }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 11px; color: var(--text3); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; }
+
+/* ── TASK ITEM ── */
+.task-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.1s;
+}
+.task-item:last-child { border-bottom: none; }
+.task-check {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 1.5px solid var(--border-mid); flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; cursor: pointer;
+}
+.task-check.done { background: var(--green); border-color: var(--green); }
+.task-item.done .task-label { color: var(--text3); text-decoration: line-through; }
+.task-label { font-size: 14px; color: var(--text); flex: 1; line-height: 1.4; }
+.task-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.task-badge { font-size: 10px; padding: 2px 7px; border-radius: 99px; border: 1px solid var(--border); color: var(--text3); flex-shrink: 0; }
+
+/* ── AI CHAT ── */
+.chat-wrap { display: flex; flex-direction: column; height: calc(100vh - 130px); height: calc(100dvh - 130px); }
+.chat-msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.chat-msgs::-webkit-scrollbar { display: none; }
+.msg { max-width: 88%; }
+.msg.user { align-self: flex-end; }
+.msg.ai { align-self: flex-start; }
+.msg-bubble {
+  padding: 10px 14px; border-radius: 18px; font-size: 14px; line-height: 1.55;
+}
+.msg.user .msg-bubble { background: var(--accent); color: #0d0d0d; border-bottom-right-radius: 4px; }
+.msg.ai .msg-bubble { background: var(--bg2); border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 4px; }
+.msg-time { font-size: 10px; color: var(--text3); margin-top: 4px; padding: 0 4px; }
+.msg.user .msg-time { text-align: right; }
+.msg.ai .msg-time { text-align: left; }
+
+.chat-input-row {
+  display: flex; gap: 8px; padding: 12px 16px;
+  border-top: 1px solid var(--border); background: var(--bg);
+  flex-shrink: 0;
+}
+.chat-input-row textarea {
+  flex: 1; min-height: 40px; max-height: 120px; padding: 10px 14px;
+  border-radius: 20px; font-size: 14px; line-height: 1.4; overflow-y: auto;
+}
+.send-btn {
+  width: 40px; height: 40px; border-radius: 50%; background: var(--accent);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: opacity 0.15s; align-self: flex-end;
+}
+.send-btn:disabled { opacity: 0.35; }
+
+.chat-presets { padding: 8px 16px; display: flex; gap: 8px; flex-wrap: wrap; }
+.preset-chip {
+  font-size: 11px; padding: 6px 12px; border-radius: 99px;
+  background: var(--bg3); border: 1px solid var(--border-mid); color: var(--text2);
+  cursor: pointer; white-space: nowrap; transition: all 0.15s;
+}
+.preset-chip:active { border-color: var(--accent); color: var(--accent); }
+
+.typing-dots { display: flex; gap: 4px; padding: 4px 2px; align-items: center; }
+.typing-dots span {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--text3);
+  animation: bounce 1.2s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+/* ── NOTAS ── */
+.note-item {
+  margin: 0 16px 10px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.note-item:hover { border-color: var(--border-mid); }
+.note-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.note-preview { font-size: 12px; color: var(--text2); margin-top: 4px; line-height: 1.4; }
+.note-footer { display: flex; justify-content: space-between; margin-top: 8px; align-items: center; }
+.note-cat { font-size: 10px; padding: 2px 8px; border-radius: 99px; }
+.note-cat.docencia { background: rgba(200,169,110,0.12); color: var(--accent); }
+.note-cat.escritura { background: rgba(143,188,187,0.12); color: var(--accent2); }
+.note-date { font-size: 10px; color: var(--text3); }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 200; display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  width: 100%; background: var(--bg2); border-radius: 24px 24px 0 0;
+  padding: 20px; transform: translateY(40px); transition: transform 0.25s;
+  max-height: 85vh; overflow-y: auto;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--bg3); margin: 0 auto 20px; }
+.modal h3 { font-family: var(--serif); font-size: 18px; color: var(--text); margin-bottom: 16px; }
+
+/* ── HOME STATS ── */
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 12px; }
+.stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; }
+.stat-num { font-family: var(--serif); font-size: 28px; color: var(--text); }
+.stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.stat-accent { font-size: 18px; margin-bottom: 4px; }
+
+/* ── PROGRESS BAR ── */
+.prog-wrap { padding: 0 16px 4px; }
+.prog-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+.prog-bar { height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+.prog-fill.gold { background: var(--accent); }
+.prog-fill.teal { background: var(--accent2); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(10px);
+  background: var(--text); color: var(--bg); font-size: 12px; font-weight: 500;
+  padding: 8px 18px; border-radius: 99px; z-index: 300;
+  opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── NOTE EDITOR ── */
+#note-editor { display: none; position: fixed; inset: 0; background: var(--bg); z-index: 200; flex-direction: column; }
+#note-editor.open { display: flex; }
+.editor-top { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.editor-top input { flex: 1; font-size: 16px; font-weight: 500; background: none; border: none; padding: 0; border-radius: 0; }
+.editor-top input:focus { border: none; }
+#note-body { flex: 1; font-size: 14px; border: none; background: none; border-radius: 0; padding: 16px; resize: none; line-height: 1.7; }
+#note-body:focus { border: none; }
+.editor-bottom { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Asistente</div>
+      <div class="topbar-sub" id="topbar-sub">Docencia &amp; Escritura</div>
+    </div>
+    <div class="topbar-icon" onclick="openAddModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- SCREENS -->
+  <div class="screens">
+
+    <!-- HOME -->
+    <div class="screen active" id="screen-home">
+      <div class="sh"><h2>Hoy</h2><p id="home-date"></p></div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-accent">📚</div>
+          <div class="stat-num" id="stat-doc">0</div>
+          <div class="stat-label">Tareas docencia</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-accent">✍️</div>
+          <div class="stat-num" id="stat-esc">0</div>
+          <div class="stat-label">Tareas escritura</div>
+        </div>
+      </div>
+
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Docencia</span><span id="prog-doc-pct">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill gold" id="prog-doc" style="width:0%"></div></div>
+      </div>
+      <div class="prog-wrap" style="margin-top:10px">
+        <div class="prog-label"><span>Escritura</span><span id="prog-esc-pct">0%</span></div>
+        <div class="prog-bar"><div class="prog-fill teal" id="prog-esc" style="width:0%"></div></div>
+      </div>
+
+      <div class="divider" style="margin-top:16px"></div>
+
+      <div style="padding:0 16px; margin-bottom:10px">
+        <div class="label" style="font-size:11px;color:var(--text3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px">Pendientes hoy</div>
+        <div id="home-tasks-list"></div>
+      </div>
+
+      <div class="card" style="border-color:rgba(200,169,110,0.25)">
+        <div class="card-row">
+          <div class="card-icon gold">🤖</div>
+          <div>
+            <div class="card h3" style="font-size:14px;font-weight:500">Asistente IA</div>
+            <div class="card p" style="font-size:12px;color:var(--text2)">Pídele ayuda con tus clases o con tu escritura</div>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="goTo('ia')">Abrir asistente →</button>
+      </div>
+    </div>
+
+    <!-- TAREAS -->
+    <div class="screen" id="screen-tareas">
+      <div class="sh"><h2>Tareas</h2><p>Organiza tu trabajo diario</p></div>
+      <div class="pills" id="filter-pills">
+        <span class="pill active" data-filter="todas" onclick="setFilter('todas',this)">Todas</span>
+        <span class="pill" data-filter="docencia" onclick="setFilter('docencia',this)">📚 Docencia</span>
+        <span class="pill" data-filter="escritura" onclick="setFilter('escritura',this)">✍️ Escritura</span>
+        <span class="pill" data-filter="pendientes" onclick="setFilter('pendientes',this)">Pendientes</span>
+      </div>
+      <div id="task-list-container"></div>
+    </div>
+
+    <!-- ASISTENTE IA -->
+    <div class="screen" id="screen-ia">
+      <div class="chat-wrap">
+        <div style="padding:10px 16px 4px">
+          <div class="chat-presets" id="chat-presets">
+            <span class="preset-chip" onclick="usePreset(this)">Planear una clase</span>
+            <span class="preset-chip" onclick="usePreset(this)">Rúbrica de evaluación</span>
+            <span class="preset-chip" onclick="usePreset(this)">Retroalimentación a estudiantes</span>
+            <span class="preset-chip" onclick="usePreset(this)">Superar bloqueo creativo</span>
+            <span class="preset-chip" onclick="usePreset(this)">Revisar mi texto</span>
+            <span class="preset-chip" onclick="usePreset(this)">Ideas para un cuento</span>
+            <span class="preset-chip" onclick="usePreset(this)">Estructura narrativa</span>
+            <span class="preset-chip" onclick="usePreset(this)">Actividad para mis estudiantes</span>
+          </div>
+        </div>
+        <div class="chat-msgs" id="chat-msgs"></div>
+        <div class="chat-input-row">
+          <textarea id="chat-input" placeholder="Escribe tu pregunta…" rows="1" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0d0d0d" stroke-width="2.5" stroke-linecap="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTAS -->
+    <div class="screen" id="screen-notas">
+      <div class="sh"><h2>Notas</h2><p>Apuntes de lectura y escritura</p></div>
+      <div class="pills">
+        <span class="pill active" data-nfilter="todas" onclick="setNFilter('todas',this)">Todas</span>
+        <span class="pill" data-nfilter="docencia" onclick="setNFilter('docencia',this)">Docencia</span>
+        <span class="pill" data-nfilter="escritura" onclick="setNFilter('escritura',this)">Escritura</span>
+      </div>
+      <div id="notes-list"></div>
+      <div style="padding:0 16px">
+        <button class="btn btn-ghost btn-full" onclick="openNoteEditor(null)">+ Nueva nota</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" id="nav-home" onclick="goTo('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Inicio
+    </button>
+    <button class="nav-btn" id="nav-tareas" onclick="goTo('tareas')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="11" width="13" height="13" rx="2"/><path d="M5 7H3a2 2 0 00-2 2v9a2 2 0 002 2h2"/><polyline points="9 7 9 3 3 3"/></svg>
+      Tareas
+    </button>
+    <button class="nav-btn" id="nav-ia" onclick="goTo('ia')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      Asistente
+    </button>
+    <button class="nav-btn" id="nav-notas" onclick="goTo('notas')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Notas
+    </button>
+  </nav>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div class="modal-overlay" id="add-modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h3>Nueva tarea</h3>
+    <div class="field"><label>Descripción</label><input type="text" id="new-task-text" placeholder="¿Qué necesitas hacer?"></div>
+    <div class="field"><label>Área</label>
+      <select id="new-task-cat">
+        <option value="docencia">📚 Docencia</option>
+        <option value="escritura">✍️ Escritura</option>
+      </select>
+    </div>
+    <div class="field"><label>Prioridad</label>
+      <select id="new-task-pri">
+        <option value="normal">Normal</option>
+        <option value="alta">Alta</option>
+        <option value="baja">Baja</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeAddModal()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1" onclick="addTask()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTE EDITOR -->
+<div id="note-editor">
+  <div class="editor-top">
+    <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px" onclick="closeNoteEditor(false)">← Volver</button>
+    <input type="text" id="note-title-input" placeholder="Título de la nota…">
+    <select id="note-cat-select" style="width:auto;padding:8px 10px;font-size:12px">
+      <option value="docencia">Docencia</option>
+      <option value="escritura">Escritura</option>
+    </select>
+  </div>
+  <textarea id="note-body" placeholder="Escribe tu nota aquí…"></textarea>
+  <div class="editor-bottom">
+    <button class="btn btn-ghost" style="flex:1" onclick="deleteNote()">Eliminar</button>
+    <button class="btn btn-primary" style="flex:1" onclick="closeNoteEditor(true)">Guardar</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let tasks = JSON.parse(localStorage.getItem('ap_tasks') || '[]');
+let notes = JSON.parse(localStorage.getItem('ap_notes') || '[]');
+let chatHistory = [];
+let currentFilter = 'todas';
+let currentNFilter = 'todas';
+let editingNoteId = null;
+
+if (tasks.length === 0) {
+  tasks = [
+    { id: uid(), text: 'Publicar guía de la semana en Classroom', cat: 'docencia', pri: 'alta', done: false, date: today() },
+    { id: uid(), text: 'Revisar entregas del foro de discusión', cat: 'docencia', pri: 'normal', done: false, date: today() },
+    { id: uid(), text: 'Sesión de lectura — 30 minutos', cat: 'escritura', pri: 'normal', done: false, date: today() },
+    { id: uid(), text: 'Avanzar 200 palabras en el borrador', cat: 'escritura', pri: 'alta', done: false, date: today() },
+    { id: uid(), text: 'Responder mensajes de estudiantes', cat: 'docencia', pri: 'baja', done: false, date: today() },
+  ];
+  saveTasks();
+}
+
+if (notes.length === 0) {
+  notes = [
+    { id: uid(), title: 'Ideas para el taller de escritura', body: 'Ejercicio de escritura automática\nEscritura de personajes desde el objeto\nRelaciones entre espacio y memoria', cat: 'escritura', date: today() },
+    { id: uid(), title: 'Notas clase — Estrategias pedagógicas', body: 'Aprendizaje basado en proyectos\nEvaluación formativa continua\nRúbricas co-construidas con estudiantes', cat: 'docencia', date: today() },
+  ];
+  saveNotes();
+}
+
+// ── UTILS ──
+function uid() { return Math.random().toString(36).slice(2,10); }
+function today() { return new Date().toLocaleDateString('es-CO',{year:'numeric',month:'short',day:'numeric'}); }
+function saveTasks() { localStorage.setItem('ap_tasks', JSON.stringify(tasks)); }
+function saveNotes() { localStorage.setItem('ap_notes', JSON.stringify(notes)); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── NAVIGATION ──
+const screens = ['home','tareas','ia','notas'];
+const topTitles = { home:'Asistente', tareas:'Mis Tareas', ia:'Asistente IA', notas:'Mis Notas' };
+const topSubs = { home:'Docencia & Escritura', tareas:'Organiza tu trabajo', ia:'Pregúntame lo que necesites', notas:'Apuntes y borradores' };
+
+function goTo(s) {
+  screens.forEach(n => {
+    document.getElementById('screen-'+n).classList.toggle('active', n===s);
+    document.getElementById('nav-'+n)?.classList.toggle('active', n===s);
+  });
+  document.getElementById('topbar-title').textContent = topTitles[s];
+  document.getElementById('topbar-sub').textContent = topSubs[s];
+  if (s==='home') renderHome();
+  if (s==='tareas') renderTasks();
+  if (s==='notas') renderNotes();
+  if (s==='ia' && chatHistory.length===0) addAIMsg('¡Hola! Soy tu asistente para docencia y escritura creativa. Puedo ayudarte a planear clases, crear rúbricas, dar retroalimentación a estudiantes, superar bloqueos creativos, revisar textos y más. ¿En qué trabajamos hoy?');
+}
+
+// ── HOME ──
+document.getElementById('home-date').textContent = new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
+
+function renderHome() {
+  const doc = tasks.filter(t=>t.cat==='docencia');
+  const esc = tasks.filter(t=>t.cat==='escritura');
+  const docDone = doc.filter(t=>t.done).length;
+  const escDone = esc.filter(t=>t.done).length;
+
+  document.getElementById('stat-doc').textContent = doc.filter(t=>!t.done).length;
+  document.getElementById('stat-esc').textContent = esc.filter(t=>!t.done).length;
+
+  const dPct = doc.length ? Math.round(docDone/doc.length*100) : 0;
+  const ePct = esc.length ? Math.round(escDone/esc.length*100) : 0;
+  document.getElementById('prog-doc').style.width = dPct+'%';
+  document.getElementById('prog-doc-pct').textContent = dPct+'%';
+  document.getElementById('prog-esc').style.width = ePct+'%';
+  document.getElementById('prog-esc-pct').textContent = ePct+'%';
+
+  const pending = tasks.filter(t=>!t.done).slice(0,5);
+  const el = document.getElementById('home-tasks-list');
+  if (!pending.length) { el.innerHTML = '<p style="font-size:13px;color:var(--text3);padding:8px 0">¡Todo al día! 🎉</p>'; return; }
+  el.innerHTML = pending.map(t => `
+    <div class="task-item ${t.done?'done':''}" style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">
+        ${t.done?`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+      </div>
+      <div style="flex:1">
+        <div class="task-label">${t.text}</div>
+        <div class="task-meta">${t.cat==='docencia'?'📚':'✍️'} ${t.cat} · ${t.pri}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── TASKS ──
+function renderTasks() {
+  let filtered = tasks;
+  if (currentFilter==='docencia') filtered = tasks.filter(t=>t.cat==='docencia');
+  else if (currentFilter==='escritura') filtered = tasks.filter(t=>t.cat==='escritura');
+  else if (currentFilter==='pendientes') filtered = tasks.filter(t=>!t.done);
+
+  const el = document.getElementById('task-list-container');
+  if (!filtered.length) { el.innerHTML = '<p style="font-size:13px;color:var(--text3);padding:20px">No hay tareas aquí.</p>'; return; }
+
+  el.innerHTML = `<div style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">` +
+    filtered.map(t => `
+    <div class="task-item ${t.done?'done':''}">
+      <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">
+        ${t.done?`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+      </div>
+      <div style="flex:1">
+        <div class="task-label">${t.text}</div>
+        <div class="task-meta">${today()} · ${t.pri}</div>
+      </div>
+      <span class="task-badge">${t.cat==='docencia'?'📚':'✍️'}</span>
+    </div>`).join('') + `</div>`;
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('#filter-pills .pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderTasks();
+}
+
+function toggleTask(id) {
+  const t = tasks.find(t=>t.id===id);
+  if (t) { t.done = !t.done; saveTasks(); renderTasks(); renderHome(); }
+}
+
+// ── ADD TASK ──
+function openAddModal() {
+  document.getElementById('add-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('new-task-text').focus(), 300);
+}
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+function closeModal(e) { if (e.target.id==='add-modal') closeAddModal(); }
+function addTask() {
+  const text = document.getElementById('new-task-text').value.trim();
+  if (!text) return;
+  tasks.unshift({ id:uid(), text, cat:document.getElementById('new-task-cat').value, pri:document.getElementById('new-task-pri').value, done:false, date:today() });
+  saveTasks(); closeAddModal();
+  document.getElementById('new-task-text').value = '';
+  renderHome(); renderTasks();
+  showToast('Tarea agregada');
+}
+
+// ── NOTES ──
+function renderNotes() {
+  let filtered = notes;
+  if (currentNFilter !== 'todas') filtered = notes.filter(n=>n.cat===currentNFilter);
+  const el = document.getElementById('notes-list');
+  if (!filtered.length) { el.innerHTML = '<p style="font-size:13px;color:var(--text3);padding:20px 16px">Aún no hay notas aquí.</p>'; return; }
+  el.innerHTML = filtered.map(n => `
+    <div class="note-item" onclick="openNoteEditor('${n.id}')">
+      <div class="note-title">${n.title || 'Sin título'}</div>
+      <div class="note-preview">${(n.body||'').substring(0,80)}…</div>
+      <div class="note-footer">
+        <span class="note-cat ${n.cat}">${n.cat}</span>
+        <span class="note-date">${n.date}</span>
+      </div>
+    </div>`).join('');
+}
+
+function setNFilter(f, el) {
+  currentNFilter = f;
+  document.querySelectorAll('[data-nfilter]').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  renderNotes();
+}
+
+function openNoteEditor(id) {
+  editingNoteId = id;
+  const editor = document.getElementById('note-editor');
+  if (id) {
+    const n = notes.find(n=>n.id===id);
+    document.getElementById('note-title-input').value = n.title || '';
+    document.getElementById('note-body').value = n.body || '';
+    document.getElementById('note-cat-select').value = n.cat || 'escritura';
+  } else {
+    document.getElementById('note-title-input').value = '';
+    document.getElementById('note-body').value = '';
+    document.getElementById('note-cat-select').value = 'escritura';
+  }
+  editor.classList.add('open');
+}
+
+function closeNoteEditor(save) {
+  if (save) {
+    const title = document.getElementById('note-title-input').value.trim();
+    const body = document.getElementById('note-body').value.trim();
+    const cat = document.getElementById('note-cat-select').value;
+    if (editingNoteId) {
+      const n = notes.find(n=>n.id===editingNoteId);
+      if (n) { n.title=title; n.body=body; n.cat=cat; n.date=today(); }
+    } else {
+      notes.unshift({ id:uid(), title:title||'Sin título', body, cat, date:today() });
+    }
+    saveNotes(); renderNotes(); showToast('Nota guardada');
+  }
+  document.getElementById('note-editor').classList.remove('open');
+  editingNoteId = null;
+}
+
+function deleteNote() {
+  if (!editingNoteId) { closeNoteEditor(false); return; }
+  notes = notes.filter(n=>n.id!==editingNoteId);
+  saveNotes(); renderNotes();
+  document.getElementById('note-editor').classList.remove('open');
+  editingNoteId = null;
+  showToast('Nota eliminada');
+}
+
+// ── AI CHAT ──
+function addAIMsg(text) {
+  const msgs = document.getElementById('chat-msgs');
+  const time = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div><div class="msg-time">${time}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  chatHistory.push({role:'assistant', content:text});
+}
+
+function addUserMsg(text) {
+  const msgs = document.getElementById('chat-msgs');
+  const time = new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div><div class="msg-time">${time}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  chatHistory.push({role:'user', content:text});
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'msg ai'; div.id = 'typing-indicator';
+  div.innerHTML = `<div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addUserMsg(text);
+  input.value = ''; input.style.height = '';
+  document.getElementById('send-btn').disabled = true;
+  document.getElementById('chat-presets').style.display = 'none';
+  showTyping();
+
+  const sysPrompt = `Eres un asistente personal especializado en docencia universitaria y taller de escritura creativa. El usuario trabaja en Colombia, en contexto universitario y de extensión agrícola (AGROSAVIA). 
+
+Para DOCENCIA: ayuda con planeación de clases, rúbricas, evaluación formativa, estrategias pedagógicas, retroalimentación a estudiantes, actividades en Classroom, aprendizaje basado en proyectos.
+
+Para ESCRITURA CREATIVA: ayuda a superar bloqueos, desarrollar personajes, trabajar la estructura narrativa, revisar textos, generar ideas, explorar técnicas como escritura automática, punto de vista, tiempo narrativo.
+
+Responde de forma cálida, directa y práctica. Usa listas cuando sean útiles. Sé conciso pero sustancioso. Responde siempre en español.`;
+
+  try {
+    const messages = [...chatHistory.slice(-10)];
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: sysPrompt,
+        messages: messages
+      })
+    });
+
+    const data = await res.json();
+    removeTyping();
+    const reply = data.content?.[0]?.text || 'No pude obtener una respuesta. Intenta de nuevo.';
+    addAIMsg(reply);
+  } catch(e) {
+    removeTyping();
+    addAIMsg('Hubo un error de conexión. Verifica tu internet e intenta de nuevo.');
+  }
+  document.getElementById('send-btn').disabled = false;
+}
+
+function usePreset(el) {
+  document.getElementById('chat-input').value = el.textContent;
+  sendMessage();
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+document.getElementById('chat-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+// ── INIT ──
+renderHome();
+</script>
+</body>
+</html>

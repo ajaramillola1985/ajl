@@ -262,7 +262,8 @@ select option{background:var(--bg2);}
             <div class="card-icon gold">✦</div>
             <div><div style="font-size:14px;font-weight:600;color:var(--text)">Asistente IA</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
           </div>
-          <button class="btn btn-primary btn-full" style="margin-top:14px" onclick="goTo('ia')">Abrir asistente</button>
+          <button class="btn btn-full" style="margin-top:8px;background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:600;" onclick="verResumenHoy()">☀️ Ver resumen de hoy</button>
+
         </div>
       </div>
     </div>
@@ -349,10 +350,7 @@ select option{background:var(--bg2);}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       Calendario
     </button>
-    <button class="nav-btn" id="nav-ia" onclick="goTo('ia')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-      Asistente
-    </button>
+
     <button class="nav-btn" id="nav-notas" onclick="goTo('notas')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Notas
@@ -476,15 +474,15 @@ function fsDel(type,id){try{if(type==='task'&&window.fsDeleteTask)window.fsDelet
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
 // NAV
-const screens=['home','tareas','cal','ia','notas'];
-const topTitles={home:'Asistente',tareas:'Mis Tareas',cal:'Calendario',ia:'Asistente IA',notas:'Mis Notas'};
+const screens=['home','tareas','cal','notas'];
+const topTitles={home:'Asistente',tareas:'Mis Tareas',cal:'Calendario',notas:'Mis Notas'};
 const topSubs={home:'Docencia & Escritura',tareas:'Organiza tu trabajo',cal:'Eventos y fechas clave',ia:'Pregúntame lo que necesites',notas:'Apuntes y borradores'};
 function goTo(s){
   screens.forEach(n=>{document.getElementById('screen-'+n)?.classList.toggle('active',n===s);document.getElementById('nav-'+n)?.classList.toggle('active',n===s);});
   document.getElementById('topbar-title').textContent=topTitles[s];
   document.getElementById('topbar-sub').textContent=topSubs[s];
   if(s==='home')renderHome();if(s==='tareas')renderTasks();if(s==='cal')renderCalendar();if(s==='notas')renderNotes();
-  if(s==='ia'&&chatHistory.length===0)addAIMsg('¡Hola! Soy tu asistente para docencia y escritura creativa. ¿En qué trabajamos hoy?');
+
 }
 
 // HOME
@@ -864,7 +862,7 @@ async function sendMessage() {
 
   try {
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyBHkYOwFxJ4N5U1bZ4f9XEqq_ZTcmzrAsw",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAzX_w3G6O_UMTyjHDNmIKFpsHmbKA7Fwc",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -907,7 +905,101 @@ async function sendMessage() {
 }
 function usePreset(el){document.getElementById('chat-input').value=el.textContent;sendMessage();}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
-document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
+
+// ── RECORDATORIO MATUTINO ──
+function getDayResumen() {
+  const now = new Date();
+  const hoy = now.toISOString().split('T')[0];
+  const diasSemana = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const dia = diasSemana[now.getDay()];
+
+  const tareasHoy = tasks.filter(t => !t.done && t.due === hoy);
+  const eventosHoy = events.filter(e => e.date === hoy);
+
+  let resumen = `🌅 Buenos días. Es ${dia}. Aquí está tu día:\n\n`;
+
+  if (eventosHoy.length > 0) {
+    resumen += `📅 Eventos de hoy:\n`;
+    eventosHoy.forEach(e => { resumen += `  • ${e.title}${e.time ? ' a las ' + e.time : ''}\n`; });
+    resumen += '\n';
+  } else {
+    resumen += `📅 Sin eventos programados hoy.\n\n`;
+  }
+
+  if (tareasHoy.length > 0) {
+    resumen += `✅ Tareas para hoy:\n`;
+    tareasHoy.forEach(t => { resumen += `  • ${t.text}\n`; });
+  } else {
+    resumen += `✅ Sin tareas pendientes para hoy.`;
+  }
+
+  return resumen;
+}
+
+function scheduleMorningReminder() {
+  const now = new Date();
+  const day = now.getDay(); // 0=dom, 6=sab
+  if (day === 0 || day === 6) return; // solo lun-vie
+
+  const target = new Date(now);
+  target.setHours(7, 20, 0, 0);
+
+  let msUntil = target - now;
+  if (msUntil < 0) msUntil += 24 * 60 * 60 * 1000; // si ya pasó, mañana
+
+  setTimeout(() => {
+    const d2 = new Date();
+    const d2day = d2.getDay();
+    if (d2day !== 0 && d2day !== 6) {
+      showMorningAlert();
+    }
+    // Reprogramar para el día siguiente
+    scheduleMorningReminder();
+  }, msUntil);
+}
+
+function showMorningAlert() {
+  // Notificación nativa si está permitida
+  if (Notification && Notification.permission === 'granted') {
+    new Notification('☀️ Planea tu día', {
+      body: 'Revisa tus tareas y eventos para hoy.',
+      icon: 'icon-192.png'
+    });
+  }
+  // Toast + modal en la app
+  const resumen = getDayResumen();
+  showDayModal(resumen);
+}
+
+function showDayModal(texto) {
+  // Crear modal si no existe
+  let overlay = document.getElementById('day-modal');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'day-modal';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px);';
+    overlay.innerHTML = `
+      <div style="background:var(--bg2);border:1px solid var(--border-mid);border-radius:var(--r);padding:28px 24px;max-width:400px;width:100%;max-height:80vh;overflow-y:auto;">
+        <div style="font-family:var(--serif);font-size:20px;font-style:italic;color:var(--gold);margin-bottom:16px;">☀️ Planea tu día</div>
+        <div id="day-modal-body" style="font-size:14px;line-height:1.7;color:var(--text);white-space:pre-line;"></div>
+        <button onclick="document.getElementById('day-modal').remove()" style="margin-top:20px;width:100%;padding:12px;background:var(--gold);color:#000;border:none;border-radius:var(--r-sm);font-weight:600;font-size:14px;cursor:pointer;">¡Listo, a trabajar!</button>
+      </div>`;
+    document.body.appendChild(overlay);
+  }
+  document.getElementById('day-modal-body').textContent = texto;
+}
+
+// Pedir permiso para notificaciones y arrancar recordatorio
+if (Notification && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+scheduleMorningReminder();
+
+// Botón en inicio para ver resumen manual
+function verResumenHoy() {
+  showDayModal(getDayResumen());
+}
+
 
 // INIT
 renderHome();
@@ -921,7 +1013,7 @@ renderHome();
   } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
   const firebaseConfig = {
-    apiKey: "AIzaSyBHkYOwFxJ4N5U1bZ4f9XEqq_ZTcmzrAsw",
+    apiKey: "AIzaSyD7ENXbolzhCw4IGK2yvFKAOX4JufKQhas",
     authDomain: "asistente-ajl.firebaseapp.com",
     projectId: "asistente-ajl",
     storageBucket: "asistente-ajl.firebasestorage.app",
@@ -1034,13 +1126,3 @@ renderHome();
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-

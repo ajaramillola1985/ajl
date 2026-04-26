@@ -861,7 +861,7 @@ async function sendMessage() {
   addUserMsg(message);
   input.value = "";
 
-  addTyping();
+  showTyping();
 
   try {
     const response = await fetch(
@@ -1029,5 +1029,3 @@ renderHome();
 </script>
 </body>
 </html>
-
-

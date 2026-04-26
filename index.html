@@ -3,32 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0d0d0d">
+<meta name="theme-color" content="#f7f4ef">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Asistente">
 <title>Asistente Personal</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;1,400;1,500&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async></script>
 <style>
 :root{
-  --bg:#0a0a0a;--bg2:#111111;--bg3:#1a1a1a;--bg4:#222222;
-  --border:rgba(255,255,255,0.06);--border-mid:rgba(255,255,255,0.12);--border-hi:rgba(255,255,255,0.18);
-  --text:#f5f0ea;--text2:#9a9490;--text3:#5c5854;--text4:#3a3834;
-  --gold:#c8a96e;--gold2:#e8c98e;--gold-dim:rgba(200,169,110,0.08);
-  --teal:#7ab8b6;--teal-dim:rgba(122,184,182,0.08);
-  --rose:#c07070;--rose-dim:rgba(192,112,112,0.08);
-  --sage:#8aac8a;--sage-dim:rgba(138,172,138,0.08);
+  --bg:#f7f4ef;--bg2:#ffffff;--bg3:#f0ece4;--bg4:#e8e3da;
+  --border:rgba(139,120,100,0.12);--border-mid:rgba(139,120,100,0.2);--border-hi:rgba(139,120,100,0.35);
+  --text:#2d2520;--text2:#6b5c50;--text3:#9e8e82;--text4:#c4b8af;
+  --gold:#d4845a;--gold2:#e8a07a;--gold-dim:rgba(212,132,90,0.10);
+  --teal:#5a9e96;--teal-dim:rgba(90,158,150,0.10);
+  --rose:#c97070;--rose-dim:rgba(201,112,112,0.10);
+  --sage:#7aaa82;--sage-dim:rgba(122,170,130,0.10);
+  --lavender:#8b7eb8;--lavender-dim:rgba(139,126,184,0.10);
   --r:18px;--r-sm:12px;--r-xs:8px;
-  --serif:'Lora',Georgia,serif;--sans:'Poppins',system-ui,sans-serif;
+  --serif:'Playfair Display',Georgia,serif;--sans:'Nunito',system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;-webkit-font-smoothing:antialiased;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 .app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
 /* TOPBAR */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 13px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 13px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;box-shadow:0 2px 12px rgba(139,120,100,0.06);}
 .topbar::after{content:'';position:absolute;bottom:0;left:20px;right:20px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.25;}
 .topbar-title{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--text);letter-spacing:.01em;line-height:1.2;}
 .topbar-sub{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.06em;text-transform:uppercase;}
@@ -40,7 +42,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .screen.active{display:block;}
 .screen::-webkit-scrollbar{display:none;}
 /* NAV */
-.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(10,10,10,.96);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom);z-index:100;backdrop-filter:blur(20px);}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(247,244,239,.97);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom);z-index:100;backdrop-filter:blur(20px);box-shadow:0 -4px 24px rgba(139,120,100,0.08);}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:11px 4px 9px;cursor:pointer;background:none;border:none;color:var(--text3);font-family:var(--sans);font-size:10px;font-weight:500;gap:4px;transition:color .2s;letter-spacing:.02em;}
 .nav-btn svg{width:21px;height:21px;transition:transform .2s;}
 .nav-btn.active{color:var(--gold);}
@@ -60,7 +62,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 16px;}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;position:relative;overflow:hidden;}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);opacity:.5;}
-.stat-card:last-child::before{background:linear-gradient(90deg,var(--teal),transparent);}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,var(--teal),transparent);opacity:.5;}.stat-card:nth-child(3)::before{background:linear-gradient(90deg,var(--lavender),transparent);opacity:.5;}.stat-card:last-child::before{background:linear-gradient(90deg,var(--sage),transparent);opacity:.5;}
 .stat-emoji{font-size:22px;margin-bottom:10px;display:block;}
 .stat-num{font-family:var(--serif);font-size:32px;font-weight:600;color:var(--text);line-height:1;}
 .stat-label{font-size:11px;color:var(--text3);margin-top:5px;letter-spacing:.03em;}
@@ -81,7 +83,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:var(--r-sm);font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.02em;cursor:pointer;border:none;transition:all .15s;}
 .btn:active{transform:scale(.96);}
-.btn-primary{background:linear-gradient(135deg,var(--gold),#b8993e);color:#0a0a0a;box-shadow:0 2px 12px rgba(200,169,110,.2);}
+.btn-primary{background:linear-gradient(135deg,var(--gold),#c4703a);color:#fff;box-shadow:0 4px 16px rgba(212,132,90,.30);}
 .btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border-mid);}
 .btn-ghost:active{border-color:var(--border-hi);color:var(--text);}
 .btn-full{width:100%;}
@@ -89,7 +91,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 /* INPUTS */
 input,textarea,select{width:100%;background:var(--bg3);border:1px solid var(--border-mid);border-radius:var(--r-sm);color:var(--text);font-family:var(--sans);font-size:14px;padding:13px 15px;outline:none;transition:border-color .2s,box-shadow .2s;}
 input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,169,110,.1);}
-input[type="date"],input[type="time"]{color-scheme:dark;}
+input[type="date"],input[type="time"]{color-scheme:light;}
 textarea{resize:none;line-height:1.65;}
 select option{background:var(--bg2);}
 .field{margin-bottom:14px;}
@@ -260,7 +262,7 @@ select option{background:var(--bg2);}
         <div class="card" style="border-color:rgba(200,169,110,.18);background:linear-gradient(135deg,var(--bg2),rgba(200,169,110,.04))">
           <div class="card-row">
             <div class="card-icon gold">✦</div>
-            <div><div style="font-size:14px;font-weight:600;color:var(--text)">¿Que tienes para hoy?</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
+            <div><div style="font-size:14px;font-weight:600;color:var(--text)">Asistente IA</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
           </div>
           <button class="btn btn-full" style="margin-top:8px;background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:600;" onclick="verResumenHoy()">☀️ Ver resumen de hoy</button>
 
@@ -1126,5 +1128,3 @@ renderHome();
 </script>
 </body>
 </html>
-
-

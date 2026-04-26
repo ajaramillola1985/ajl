@@ -235,7 +235,7 @@ select option{background:var(--bg2);}
     <!-- HOME -->
     <div class="screen active" id="screen-home">
       <div style="padding:24px 20px 0">
-        <div style="font-family:var(--serif);font-size:28px;font-style:italic;color:var(--text);margin-top:3px;line-height:1.2">¡Hola Alejandro!</div>
+        <div style="font-family:var(--serif);font-size:28px;font-style:italic;color:var(--text);margin-top:3px;line-height:1.2">Alejandro</div>
         <div style="font-size:12px;color:var(--text3);margin-top:4px" id="home-date"></div>
         <div style="width:32px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:14px 0 20px;border-radius:1px"></div>
       </div>
@@ -261,7 +261,7 @@ select option{background:var(--bg2);}
         <div class="card" style="border-color:rgba(200,169,110,.18);background:linear-gradient(135deg,var(--bg2),rgba(200,169,110,.04))">
           <div class="card-row">
             <div class="card-icon gold">✦</div>
-            <div><div style="font-size:14px;font-weight:600;color:var(--text)">¿Cómo estamos hoy?</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
+            <div><div style="font-size:14px;font-weight:600;color:var(--text)">Asistente IA</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
           </div>
           <button class="btn btn-full" style="margin-top:8px;background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:600;" onclick="verResumenHoy()">☀️ Ver resumen de hoy</button>
 
@@ -372,6 +372,20 @@ select option{background:var(--bg2);}
       <div class="field"><label>Descripción</label><input type="text" id="new-task-text" placeholder="¿Qué necesitas hacer?"></div>
       <div class="field"><label>Área</label><select id="new-task-cat"><option value="docencia">📚 Docencia</option><option value="escritura">✍️ Escritura</option></select></div>
       <div class="field"><label>Prioridad</label><select id="new-task-pri"><option value="normal">Normal</option><option value="alta">Alta</option><option value="baja">Baja</option></select></div>
+      <div class="field"><label>Fecha límite</label><input type="date" id="new-task-due"></div>
+      <div class="field"><label>🔔 Recordatorio</label>
+        <select id="new-task-reminder">
+          <option value="">Sin recordatorio</option>
+          <option value="same-08:00">El mismo día a las 8:00 AM</option>
+          <option value="same-12:00">El mismo día a las 12:00 PM</option>
+          <option value="same-18:00">El mismo día a las 6:00 PM</option>
+          <option value="1d-08:00">1 día antes a las 8:00 AM</option>
+          <option value="1d-18:00">1 día antes a las 6:00 PM</option>
+          <option value="2d-08:00">2 días antes a las 8:00 AM</option>
+          <option value="3d-08:00">3 días antes a las 8:00 AM</option>
+          <option value="1w-08:00">1 semana antes a las 8:00 AM</option>
+        </select>
+      </div>
       <div style="display:flex;gap:10px;margin-top:4px">
         <button class="btn btn-ghost" style="flex:1" onclick="closeAddModal()">Cancelar</button>
         <button class="btn btn-primary" style="flex:1" onclick="addTask()">Agregar</button>
@@ -737,8 +751,16 @@ function selectType(t){
 function addTask(){
   const text=document.getElementById('new-task-text').value.trim();
   if(!text){showToast('Escribe una descripción');return;}
-  tasks.unshift({id:uid(),text,cat:document.getElementById('new-task-cat').value,pri:document.getElementById('new-task-pri').value,done:false});
-  saveTasks();fsSave('task',tasks[0]);closeAddModal();document.getElementById('new-task-text').value='';
+  const due=document.getElementById('new-task-due').value||'';
+  const reminder=document.getElementById('new-task-reminder').value||'';
+  const task={id:uid(),text,cat:document.getElementById('new-task-cat').value,pri:document.getElementById('new-task-pri').value,done:false,due,reminder};
+  tasks.unshift(task);
+  saveTasks();fsSave('task',tasks[0]);
+  if(due&&reminder) scheduleTaskReminder(task);
+  closeAddModal();
+  document.getElementById('new-task-text').value='';
+  document.getElementById('new-task-due').value='';
+  document.getElementById('new-task-reminder').value='';
   renderHome();renderTasks();showToast('Tarea agregada');
 }
 function addEvent(){
@@ -945,6 +967,55 @@ function getDayResumen() {
   return txt;
 }
 
+
+// ── RECORDATORIOS DE TAREAS ──
+function parseTaskReminderDate(due, reminder) {
+  if (!due || !reminder) return null;
+  const [offset, time] = reminder.split('-');
+  const [hh, mm] = time.split(':').map(Number);
+  const base = new Date(due + 'T12:00:00');
+  if (offset === 'same') {
+    base.setHours(hh, mm, 0, 0);
+  } else if (offset === '1d') {
+    base.setDate(base.getDate() - 1);
+    base.setHours(hh, mm, 0, 0);
+  } else if (offset === '2d') {
+    base.setDate(base.getDate() - 2);
+    base.setHours(hh, mm, 0, 0);
+  } else if (offset === '3d') {
+    base.setDate(base.getDate() - 3);
+    base.setHours(hh, mm, 0, 0);
+  } else if (offset === '1w') {
+    base.setDate(base.getDate() - 7);
+    base.setHours(hh, mm, 0, 0);
+  }
+  return base;
+}
+
+function scheduleTaskReminder(task) {
+  if (!task.due || !task.reminder || task.done) return;
+  const fireAt = parseTaskReminderDate(task.due, task.reminder);
+  if (!fireAt) return;
+  const msUntil = fireAt - new Date();
+  if (msUntil < 0) return; // ya pasó
+  setTimeout(() => {
+    const t = tasks.find(t => t.id === task.id);
+    if (!t || t.done) return; // ya completada
+    if (Notification && Notification.permission === 'granted') {
+      new Notification('🔔 Tarea pendiente', {
+        body: t.text,
+        icon: 'icon-192.png',
+        tag: 'task-' + t.id
+      });
+    }
+    showToast('🔔 ' + t.text);
+  }, msUntil);
+}
+
+function scheduleAllTaskReminders() {
+  tasks.forEach(t => { if (!t.done && t.due && t.reminder) scheduleTaskReminder(t); });
+}
+scheduleAllTaskReminders();
 function scheduleMorningReminder() {
   const now = new Date();
   const day = now.getDay(); // 0=dom, 6=sab

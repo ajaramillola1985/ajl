@@ -235,7 +235,7 @@ select option{background:var(--bg2);}
     <!-- HOME -->
     <div class="screen active" id="screen-home">
       <div style="padding:24px 20px 0">
-        <div style="font-family:var(--serif);font-size:28px;font-style:italic;color:var(--text);margin-top:3px;line-height:1.2">¡Hola Alejandro!</div>
+        <div style="font-family:var(--serif);font-size:28px;font-style:italic;color:var(--text);margin-top:3px;line-height:1.2">Alejandro</div>
         <div style="font-size:12px;color:var(--text3);margin-top:4px" id="home-date"></div>
         <div style="width:32px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:14px 0 20px;border-radius:1px"></div>
       </div>
@@ -261,7 +261,7 @@ select option{background:var(--bg2);}
         <div class="card" style="border-color:rgba(200,169,110,.18);background:linear-gradient(135deg,var(--bg2),rgba(200,169,110,.04))">
           <div class="card-row">
             <div class="card-icon gold">✦</div>
-            <div><div style="font-size:14px;font-weight:600;color:var(--text)">¿Que hay hoy?</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
+            <div><div style="font-size:14px;font-weight:600;color:var(--text)">Asistente IA</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
           </div>
           <button class="btn btn-full" style="margin-top:8px;background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:600;" onclick="verResumenHoy()">☀️ Ver resumen de hoy</button>
 
@@ -935,32 +935,14 @@ function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrol
 
 // ── RECORDATORIO MATUTINO ──
 function getDayResumen() {
-  const now = new Date();
-  const hoy = now.toISOString().split('T')[0];
-  const diasSemana = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
-  const dia = diasSemana[now.getDay()];
-
+  const hoy = new Date().toISOString().split('T')[0];
   const tareasHoy = tasks.filter(t => !t.done && t.due === hoy);
   const eventosHoy = events.filter(e => e.date === hoy);
-
-  let resumen = `🌅 Buenos días. Es ${dia}. Aquí está tu día:\n\n`;
-
-  if (eventosHoy.length > 0) {
-    resumen += `📅 Eventos de hoy:\n`;
-    eventosHoy.forEach(e => { resumen += `  • ${e.title}${e.time ? ' a las ' + e.time : ''}\n`; });
-    resumen += '\n';
-  } else {
-    resumen += `📅 Sin eventos programados hoy.\n\n`;
-  }
-
-  if (tareasHoy.length > 0) {
-    resumen += `✅ Tareas para hoy:\n`;
-    tareasHoy.forEach(t => { resumen += `  • ${t.text}\n`; });
-  } else {
-    resumen += `✅ Sin tareas pendientes para hoy.`;
-  }
-
-  return resumen;
+  let txt = '';
+  if (eventosHoy.length) { txt += 'Eventos: ' + eventosHoy.map(e => e.name).join(', ') + '. '; }
+  if (tareasHoy.length) { txt += 'Tareas: ' + tareasHoy.map(t => t.text).join(', ') + '.'; }
+  if (!txt) txt = 'Sin eventos ni tareas para hoy.';
+  return txt;
 }
 
 function scheduleMorningReminder() {
@@ -994,26 +976,93 @@ function showMorningAlert() {
     });
   }
   // Toast + modal en la app
-  const resumen = getDayResumen();
-  showDayModal(resumen);
+  showDayModal();
 }
 
-function showDayModal(texto) {
-  // Crear modal si no existe
+function renderDayModal() {
+  const body = document.getElementById('day-modal-body');
+  if (!body) return;
+  const hoy = new Date().toISOString().split('T')[0];
+  const eventosHoy = events.filter(e => e.date === hoy).sort((a,b) => (a.start||'').localeCompare(b.start||''));
+  const tareasPendientes = tasks.filter(t => !t.done && t.due === hoy);
+  const tareasCompletadas = tasks.filter(t => t.done && t.due === hoy);
+  const todasTareas = tasks.filter(t => t.due === hoy);
+  const pct = todasTareas.length ? Math.round(tareasCompletadas.length / todasTareas.length * 100) : 0;
+
+  let html = '';
+
+  // Barra de progreso
+  if (todasTareas.length > 0) {
+    html += `<div style="margin-bottom:18px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:6px">
+        <span>Progreso del día</span><span style="color:var(--gold);font-weight:700">${pct}%</span>
+      </div>
+      <div style="height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:3px;transition:width .4s ease"></div>
+      </div>
+    </div>`;
+  }
+
+  // Eventos de hoy
+  html += `<div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px">📅 Eventos de hoy</div>`;
+  if (eventosHoy.length) {
+    html += eventosHoy.map(e => `
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border-radius:var(--r-xs);margin-bottom:6px;border-left:3px solid var(--gold)">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${e.name}</div>
+          ${e.start ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">🕐 ${e.start}</div>` : ''}
+        </div>
+      </div>`).join('');
+  } else {
+    html += `<p style="font-size:13px;color:var(--text3);padding:6px 0 12px">Sin eventos para hoy</p>`;
+  }
+
+  // Tareas pendientes con checkbox
+  html += `<div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin:14px 0 8px">✅ Tareas pendientes</div>`;
+  if (tareasPendientes.length) {
+    html += tareasPendientes.map(t => `
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg3);border-radius:var(--r-xs);margin-bottom:6px;cursor:pointer" onclick="toggleTask('${t.id}');renderDayModal()">
+        <div style="width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border-hi);flex-shrink:0;display:flex;align-items:center;justify-content:center"></div>
+        <div style="font-size:13px;color:var(--text);flex:1">${t.text}</div>
+        <div style="font-size:10px;color:var(--text3)">${t.cat === 'docencia' ? '📚' : '✍️'}</div>
+      </div>`).join('');
+  } else {
+    html += `<p style="font-size:13px;color:var(--sage);padding:6px 0">¡Todo completado! 🎉</p>`;
+  }
+
+  // Tareas completadas hoy
+  if (tareasCompletadas.length) {
+    html += `<div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;margin:14px 0 8px">✔ Completadas hoy</div>`;
+    html += tareasCompletadas.map(t => `
+      <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r-xs);margin-bottom:6px;opacity:.55;cursor:pointer" onclick="toggleTask('${t.id}');renderDayModal()">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--sage);border:1.5px solid var(--sage);flex-shrink:0;display:flex;align-items:center;justify-content:center">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div style="font-size:13px;color:var(--text);flex:1;text-decoration:line-through">${t.text}</div>
+      </div>`).join('');
+  }
+
+  body.innerHTML = html;
+}
+
+function showDayModal() {
   let overlay = document.getElementById('day-modal');
   if (!overlay) {
     overlay = document.createElement('div');
     overlay.id = 'day-modal';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px);';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.80);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(10px);';
     overlay.innerHTML = `
-      <div style="background:var(--bg2);border:1px solid var(--border-mid);border-radius:var(--r);padding:28px 24px;max-width:400px;width:100%;max-height:80vh;overflow-y:auto;">
-        <div style="font-family:var(--serif);font-size:20px;font-style:italic;color:var(--gold);margin-bottom:16px;">☀️ Planea tu día</div>
-        <div id="day-modal-body" style="font-size:14px;line-height:1.7;color:var(--text);white-space:pre-line;"></div>
-        <button onclick="document.getElementById('day-modal').remove()" style="margin-top:20px;width:100%;padding:12px;background:var(--gold);color:#000;border:none;border-radius:var(--r-sm);font-weight:600;font-size:14px;cursor:pointer;">¡Listo, a trabajar!</button>
+      <div style="background:var(--bg2);border:1px solid var(--border-mid);border-radius:var(--r);padding:24px;max-width:420px;width:100%;max-height:82vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <div style="font-family:var(--serif);font-size:20px;font-style:italic;color:var(--gold)">Mi día</div>
+          <button onclick="document.getElementById('day-modal').remove()" style="background:var(--bg3);border:1px solid var(--border-mid);color:var(--text2);width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
+        </div>
+        <div id="day-modal-body"></div>
+        <button onclick="document.getElementById('day-modal').remove()" style="margin-top:20px;width:100%;padding:12px;background:var(--gold);color:#fff;border:none;border-radius:var(--r-sm);font-weight:700;font-size:14px;cursor:pointer;">¡A trabajar!</button>
       </div>`;
     document.body.appendChild(overlay);
   }
-  document.getElementById('day-modal-body').textContent = texto;
+  renderDayModal();
 }
 
 // Pedir permiso para notificaciones y arrancar recordatorio
@@ -1024,7 +1073,7 @@ scheduleMorningReminder();
 
 // Botón en inicio para ver resumen manual
 function verResumenHoy() {
-  showDayModal(getDayResumen());
+  showDayModal();
 }
 
 

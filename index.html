@@ -10,7 +10,7 @@
 <title>Asistente Personal</title>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async></script>
 <style>
 :root{
@@ -22,7 +22,7 @@
   --rose:#c07070;--rose-dim:rgba(192,112,112,0.08);
   --sage:#8aac8a;--sage-dim:rgba(138,172,138,0.08);
   --r:18px;--r-sm:12px;--r-xs:8px;
-  --serif:'Playfair Display',Georgia,serif;--sans:'Inter',system-ui,sans-serif;
+  --serif:'Lora',Georgia,serif;--sans:'Poppins',system-ui,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;-webkit-font-smoothing:antialiased;}
@@ -221,7 +221,7 @@ select option{background:var(--bg2);}
 <div class="app">
   <div class="topbar">
     <div>
-      <div class="topbar-title" id="topbar-title">Asistente</div>
+      <div class="topbar-title" id="topbar-title">Asistente personal</div>
       <div class="topbar-sub" id="topbar-sub">Docencia &amp; Escritura</div>
     </div>
     <div class="topbar-icon" onclick="openAddModal()">
@@ -471,6 +471,8 @@ function toDateStr(d){return d.toISOString().split('T')[0];}
 function saveTasks(){localStorage.setItem('ap_tasks',JSON.stringify(tasks));}
 function saveNotes(){localStorage.setItem('ap_notes',JSON.stringify(notes));}
 function saveEvents(){localStorage.setItem('ap_events',JSON.stringify(events));}
+function fsSave(type,item){try{if(type==='task'&&window.fsUpsertTask)window.fsUpsertTask(item);else if(type==='note'&&window.fsUpsertNote)window.fsUpsertNote(item);else if(type==='event'&&window.fsUpsertEvent)window.fsUpsertEvent(item);}catch(e){console.warn('fsSave',e);}}
+function fsDel(type,id){try{if(type==='task'&&window.fsDeleteTask)window.fsDeleteTask(id);else if(type==='note'&&window.fsDeleteNote)window.fsDeleteNote(id);else if(type==='event'&&window.fsDeleteEvent)window.fsDeleteEvent(id);}catch(e){console.warn('fsDel',e);}}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 
 // NAV
@@ -517,7 +519,7 @@ function renderTasks(){
   el.innerHTML=f.length?`<div style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">`+f.map(t=>`<div class="task-item ${t.done?'done':''}"><div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">${t.done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div><div style="flex:1"><div class="task-label">${t.text}</div><div class="task-meta">${t.pri}</div></div><span class="task-badge">${t.cat==='docencia'?'📚':'✍️'}</span></div>`).join('')+`</div>`:'<p style="font-size:13px;color:var(--text3);padding:20px">Sin tareas aquí.</p>';
 }
 function setFilter(f,el){currentFilter=f;document.querySelectorAll('#filter-pills .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');renderTasks();}
-function toggleTask(id){const t=tasks.find(t=>t.id===id);if(t){t.done=!t.done;saveTasks();renderTasks();renderHome();}}
+function toggleTask(id){const t=tasks.find(t=>t.id===id);if(t){t.done=!t.done;saveTasks();fsSave('task',t);renderTasks();renderHome();}}
 
 // CALENDAR
 function renderCalendar(){
@@ -665,7 +667,7 @@ async function doExportToGcal(e){
     if(data.id){
       // Save gcal event id
       const ev=events.find(ev=>ev.id===e.id);
-      if(ev){ev.gcalId=data.id;ev.gcalLink=data.htmlLink;saveEvents();}
+      if(ev){ev.gcalId=data.id;ev.gcalLink=data.htmlLink;saveEvents();fsSave('event',ev);}
       showToast('✓ Agregado a Google Calendar');
       openEvDetail(e.id);// refresh detail
     } else {
@@ -683,7 +685,7 @@ function addOneHour(time){
   return String((h+1)%24).padStart(2,'0')+':'+String(m).padStart(2,'0');
 }
 
-function deleteEvent(id){events=events.filter(e=>e.id!==id);saveEvents();closeEvDetail();renderCalendar();renderHome();showToast('Evento eliminado');}
+function deleteEvent(id){fsDel('event',id);events=events.filter(e=>e.id!==id);saveEvents();closeEvDetail();renderCalendar();renderHome();showToast('Evento eliminado');}
 function closeEvDetail(ev){if(ev&&ev.target.id!=='ev-detail-modal')return;document.getElementById('ev-detail-modal').classList.remove('open');}
 
 // ADD MODAL
@@ -711,7 +713,7 @@ function addTask(){
   const text=document.getElementById('new-task-text').value.trim();
   if(!text){showToast('Escribe una descripción');return;}
   tasks.unshift({id:uid(),text,cat:document.getElementById('new-task-cat').value,pri:document.getElementById('new-task-pri').value,done:false});
-  saveTasks();closeAddModal();document.getElementById('new-task-text').value='';
+  saveTasks();fsSave('task',tasks[0]);closeAddModal();document.getElementById('new-task-text').value='';
   renderHome();renderTasks();showToast('Tarea agregada');
 }
 function addEvent(){
@@ -850,18 +852,53 @@ function addUserMsg(text){
 }
 function showTyping(){const msgs=document.getElementById('chat-msgs');const div=document.createElement('div');div.className='msg ai';div.id='typing-indicator';div.innerHTML=`<div class="msg-bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;msgs.appendChild(div);msgs.scrollTop=msgs.scrollHeight;}
 function removeTyping(){const el=document.getElementById('typing-indicator');if(el)el.remove();}
-async function sendMessage(){
-  const input=document.getElementById('chat-input');
-  const text=input.value.trim();if(!text)return;
-  addUserMsg(text);input.value='';input.style.height='';
-  document.getElementById('send-btn').disabled=true;showTyping();
-  const sys=`Eres un asistente personal para docencia universitaria y taller de escritura creativa. El usuario trabaja en Colombia en contexto agrícola/AGROSAVIA, Palmira. Para DOCENCIA: planeación, rúbricas, evaluación formativa, Classroom. Para ESCRITURA: bloqueos, personajes, narrativa, revisión. Responde en español, cálido y práctico.`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:chatHistory.slice(-10)})});
-    const data=await res.json();removeTyping();
-    addAIMsg(data.content?.[0]?.text||'No pude obtener respuesta. Intenta de nuevo.');
-  }catch(e){removeTyping();addAIMsg('Error de conexión. Verifica tu internet.');}
-  document.getElementById('send-btn').disabled=false;
+async function sendMessage() {
+  const input = document.getElementById("chat-input");
+  const message = input.value.trim();
+
+  if (!message) return;
+
+  addUserMsg(message);
+  input.value = "";
+
+  addTyping();
+
+  try {
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=AIzaSyAzX_w3G6O_UMTyjHDNmIKFpsHmbKA7Fwc",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: "Eres un asistente experto en docencia universitaria, escritura académica, investigación agraria y creatividad. Responde de forma clara y profesional. Usuario: " + message
+                }
+              ]
+            }
+          ]
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    removeTyping();
+
+    const reply =
+      data.candidates[0].content.parts[0].text;
+
+    addAIMsg(reply);
+
+  } catch (error) {
+    removeTyping();
+    addAIMsg("Hubo un error al conectar con Gemini.");
+    console.error(error);
+  }
 }
 function usePreset(el){document.getElementById('chat-input').value=el.textContent;sendMessage();}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
@@ -869,6 +906,126 @@ document.getElementById('chat-input').addEventListener('keydown',e=>{if(e.key===
 
 // INIT
 renderHome();
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
+  import {
+    getFirestore, doc, collection,
+    setDoc, deleteDoc, onSnapshot, getDocs
+  } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD7ENXbolzhCw4IGK2yvFKAOX4JufKQhas",
+    authDomain: "asistente-ajl.firebaseapp.com",
+    projectId: "asistente-ajl",
+    storageBucket: "asistente-ajl.firebasestorage.app",
+    messagingSenderId: "300037941087",
+    appId: "1:300037941087:web:cecc805c2a25103024f8ea",
+    measurementId: "G-ZGJ7WVRGL0"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+
+  // ── ID de usuario fijo (un solo usuario, sin login) ──
+  // Si en el futuro quieres multi-usuario, cambia esto por Auth.
+  const USER_ID = "alejandro";
+
+  function colRef(name) {
+    return collection(db, "users", USER_ID, name);
+  }
+  function docRef(name, id) {
+    return doc(db, "users", USER_ID, name, id);
+  }
+
+  // ── GUARDAR en Firestore ──
+  window.fsUpsertTask  = (t)  => setDoc(docRef("tasks",  t.id),  t);
+  window.fsDeleteTask  = (id) => deleteDoc(docRef("tasks",  id));
+  window.fsUpsertNote  = (n)  => setDoc(docRef("notes",  n.id),  n);
+  window.fsDeleteNote  = (id) => deleteDoc(docRef("notes",  id));
+  window.fsUpsertEvent = (e)  => setDoc(docRef("events", e.id),  e);
+  window.fsDeleteEvent = (id) => deleteDoc(docRef("events", id));
+
+  // ── ESCUCHAR CAMBIOS EN TIEMPO REAL ──
+  // Tareas
+  onSnapshot(colRef("tasks"), (snap) => {
+    const remote = snap.docs.map(d => d.data());
+    if (JSON.stringify(remote.sort((a,b)=>a.id.localeCompare(b.id))) !==
+        JSON.stringify([...tasks].sort((a,b)=>a.id.localeCompare(b.id)))) {
+      tasks = remote;
+      localStorage.setItem('ap_tasks', JSON.stringify(tasks));
+      renderTasks(); renderHome();
+    }
+  });
+
+  // Notas
+  onSnapshot(colRef("notes"), (snap) => {
+    const remote = snap.docs.map(d => d.data());
+    if (JSON.stringify(remote.sort((a,b)=>a.id.localeCompare(b.id))) !==
+        JSON.stringify([...notes].sort((a,b)=>a.id.localeCompare(b.id)))) {
+      notes = remote;
+      localStorage.setItem('ap_notes', JSON.stringify(notes));
+      renderNotes();
+    }
+  });
+
+  // Eventos
+  onSnapshot(colRef("events"), (snap) => {
+    const remote = snap.docs.map(d => d.data());
+    if (JSON.stringify(remote.sort((a,b)=>a.id.localeCompare(b.id))) !==
+        JSON.stringify([...events].sort((a,b)=>a.id.localeCompare(b.id)))) {
+      events = remote;
+      localStorage.setItem('ap_events', JSON.stringify(events));
+      renderCalendar(); renderHome();
+    }
+  });
+
+  // ── CARGA INICIAL desde Firestore (merge con localStorage) ──
+  async function loadFromFirestore() {
+    try {
+      const [tSnap, nSnap, eSnap] = await Promise.all([
+        getDocs(colRef("tasks")),
+        getDocs(colRef("notes")),
+        getDocs(colRef("events"))
+      ]);
+
+      const remoteTasks  = tSnap.docs.map(d => d.data());
+      const remoteNotes  = nSnap.docs.map(d => d.data());
+      const remoteEvents = eSnap.docs.map(d => d.data());
+
+      // Si hay datos en Firestore, úsalos; si no, sube los locales
+      if (remoteTasks.length > 0) {
+        tasks = remoteTasks;
+        localStorage.setItem('ap_tasks', JSON.stringify(tasks));
+      } else {
+        // Subir datos locales a Firestore por primera vez
+        tasks.forEach(t => setDoc(docRef("tasks", t.id), t));
+      }
+
+      if (remoteNotes.length > 0) {
+        notes = remoteNotes;
+        localStorage.setItem('ap_notes', JSON.stringify(notes));
+      } else {
+        notes.forEach(n => setDoc(docRef("notes", n.id), n));
+      }
+
+      if (remoteEvents.length > 0) {
+        events = remoteEvents;
+        localStorage.setItem('ap_events', JSON.stringify(events));
+      } else {
+        events.forEach(e => setDoc(docRef("events", e.id), e));
+      }
+
+      renderHome(); renderTasks(); renderNotes(); renderCalendar();
+      showToast('☁️ Sincronizado');
+    } catch (err) {
+      console.warn("Firestore no disponible, usando datos locales:", err);
+    }
+  }
+
+  loadFromFirestore();
 </script>
 </body>
 </html>

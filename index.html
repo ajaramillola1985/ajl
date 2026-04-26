@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#f7f4ef">
+<meta name="theme-color" content="#0d1117">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -15,14 +15,14 @@
 <script src="https://accounts.google.com/gsi/client" async></script>
 <style>
 :root{
-  --bg:#f7f4ef;--bg2:#ffffff;--bg3:#f0ece4;--bg4:#e8e3da;
-  --border:rgba(139,120,100,0.12);--border-mid:rgba(139,120,100,0.2);--border-hi:rgba(139,120,100,0.35);
-  --text:#2d2520;--text2:#6b5c50;--text3:#9e8e82;--text4:#c4b8af;
-  --gold:#d4845a;--gold2:#e8a07a;--gold-dim:rgba(212,132,90,0.10);
-  --teal:#5a9e96;--teal-dim:rgba(90,158,150,0.10);
-  --rose:#c97070;--rose-dim:rgba(201,112,112,0.10);
-  --sage:#7aaa82;--sage-dim:rgba(122,170,130,0.10);
-  --lavender:#8b7eb8;--lavender-dim:rgba(139,126,184,0.10);
+  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--bg4:#222830;
+  --border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.13);--border-hi:rgba(255,255,255,0.22);
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;--text4:#3d444d;
+  --gold:#4a9fd4;--gold2:#6ab8e8;--gold-dim:rgba(74,159,212,0.12);
+  --teal:#3fb950;--teal-dim:rgba(63,185,80,0.12);
+  --rose:#f78166;--rose-dim:rgba(247,129,102,0.12);
+  --sage:#56d364;--sage-dim:rgba(86,211,100,0.12);
+  --lavender:#bc8cff;--lavender-dim:rgba(188,140,255,0.12);
   --r:18px;--r-sm:12px;--r-xs:8px;
   --serif:'Playfair Display',Georgia,serif;--sans:'Nunito',system-ui,sans-serif;
 }
@@ -30,7 +30,7 @@
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 .app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
 /* TOPBAR */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 13px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;box-shadow:0 2px 12px rgba(139,120,100,0.06);}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 13px;background:var(--bg);border-bottom:1px solid var(--border);flex-shrink:0;position:relative;box-shadow:0 2px 12px rgba(0,0,0,0.2);}
 .topbar::after{content:'';position:absolute;bottom:0;left:20px;right:20px;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.25;}
 .topbar-title{font-family:var(--serif);font-size:19px;font-weight:600;color:var(--text);letter-spacing:.01em;line-height:1.2;}
 .topbar-sub{font-size:10px;color:var(--text3);margin-top:2px;letter-spacing:.06em;text-transform:uppercase;}
@@ -42,7 +42,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .screen.active{display:block;}
 .screen::-webkit-scrollbar{display:none;}
 /* NAV */
-.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(247,244,239,.97);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom);z-index:100;backdrop-filter:blur(20px);box-shadow:0 -4px 24px rgba(139,120,100,0.08);}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(13,17,23,.97);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom);z-index:100;backdrop-filter:blur(20px);box-shadow:0 -4px 24px rgba(0,0,0,0.3);}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:11px 4px 9px;cursor:pointer;background:none;border:none;color:var(--text3);font-family:var(--sans);font-size:10px;font-weight:500;gap:4px;transition:color .2s;letter-spacing:.02em;}
 .nav-btn svg{width:21px;height:21px;transition:transform .2s;}
 .nav-btn.active{color:var(--gold);}
@@ -83,7 +83,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 /* BUTTONS */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:var(--r-sm);font-family:var(--sans);font-size:13px;font-weight:600;letter-spacing:.02em;cursor:pointer;border:none;transition:all .15s;}
 .btn:active{transform:scale(.96);}
-.btn-primary{background:linear-gradient(135deg,var(--gold),#c4703a);color:#fff;box-shadow:0 4px 16px rgba(212,132,90,.30);}
+.btn-primary{background:linear-gradient(135deg,var(--gold),#1a6fa8);color:#fff;box-shadow:0 4px 16px rgba(74,159,212,.30);}
 .btn-ghost{background:var(--bg3);color:var(--text2);border:1px solid var(--border-mid);}
 .btn-ghost:active{border-color:var(--border-hi);color:var(--text);}
 .btn-full{width:100%;}
@@ -91,7 +91,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 /* INPUTS */
 input,textarea,select{width:100%;background:var(--bg3);border:1px solid var(--border-mid);border-radius:var(--r-sm);color:var(--text);font-family:var(--sans);font-size:14px;padding:13px 15px;outline:none;transition:border-color .2s,box-shadow .2s;}
 input:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,169,110,.1);}
-input[type="date"],input[type="time"]{color-scheme:light;}
+input[type="date"],input[type="time"]{color-scheme:dark;}
 textarea{resize:none;line-height:1.65;}
 select option{background:var(--bg2);}
 .field{margin-bottom:14px;}
@@ -235,7 +235,6 @@ select option{background:var(--bg2);}
     <!-- HOME -->
     <div class="screen active" id="screen-home">
       <div style="padding:24px 20px 0">
-        <div style="font-size:10px;color:var(--text4);letter-spacing:.08em;text-transform:uppercase;font-weight:600">Hola</div>
         <div style="font-family:var(--serif);font-size:28px;font-style:italic;color:var(--text);margin-top:3px;line-height:1.2">Alejandro</div>
         <div style="font-size:12px;color:var(--text3);margin-top:4px" id="home-date"></div>
         <div style="width:32px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:14px 0 20px;border-radius:1px"></div>
@@ -262,7 +261,7 @@ select option{background:var(--bg2);}
         <div class="card" style="border-color:rgba(200,169,110,.18);background:linear-gradient(135deg,var(--bg2),rgba(200,169,110,.04))">
           <div class="card-row">
             <div class="card-icon gold">✦</div>
-            <div><div style="font-size:14px;font-weight:600;color:var(--text)">¿Como está tu dia?</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
+            <div><div style="font-size:14px;font-weight:600;color:var(--text)">Asistente IA</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
           </div>
           <button class="btn btn-full" style="margin-top:8px;background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:600;" onclick="verResumenHoy()">☀️ Ver resumen de hoy</button>
 
@@ -498,15 +497,41 @@ function renderHome(){
   document.getElementById('prog-doc').style.width=dP+'%';document.getElementById('prog-doc-pct').textContent=dP+'%';
   document.getElementById('prog-esc').style.width=eP+'%';document.getElementById('prog-esc-pct').textContent=eP+'%';
   const todayStr=toDateStr(now);
-  const upcoming=events.filter(e=>e.date>=todayStr).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3);
+
+  // Eventos: primero hoy, luego próximos
+  const todayEvents=events.filter(e=>e.date===todayStr).sort((a,b)=>(a.start||'').localeCompare(b.start||''));
+  const upcomingEvents=events.filter(e=>e.date>todayStr).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3);
   const uEl=document.getElementById('home-upcoming');
-  uEl.innerHTML=upcoming.length?upcoming.map(e=>{
-    const d=new Date(e.date+'T12:00:00');
-    return `<div class="upcoming-item"><div class="upcoming-date-box"><div class="upcoming-day" style="color:${TYPE_COLORS[e.type]||'var(--accent2)'}">${d.getDate()}</div><div class="upcoming-mon">${MONTHS[d.getMonth()].slice(0,3)}</div></div><div class="upcoming-info"><div class="upcoming-name">${e.name}</div><div class="upcoming-sub">${TYPE_LABELS[e.type]||e.type}${e.start?' · '+e.start:''}</div></div></div>`;
-  }).join(''):'<p style="font-size:13px;color:var(--text3)">Sin eventos próximos</p>';
-  const pending=tasks.filter(t=>!t.done).slice(0,4);
+  let uHtml='';
+  if(todayEvents.length){
+    uHtml+=`<div style="font-size:10px;color:var(--gold);letter-spacing:.07em;text-transform:uppercase;font-weight:700;padding:0 0 8px">Hoy</div>`;
+    uHtml+=todayEvents.map(e=>`<div class="upcoming-item" style="border-left:2px solid var(--gold);padding-left:10px;margin-bottom:8px"><div class="upcoming-info"><div class="upcoming-name">${e.name}</div><div class="upcoming-sub">${TYPE_LABELS[e.type]||e.type}${e.start?' · '+e.start:''}</div></div></div>`).join('');
+  }
+  if(upcomingEvents.length){
+    uHtml+=`<div style="font-size:10px;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;font-weight:700;padding:${todayEvents.length?'12px':'0'} 0 8px">Próximos</div>`;
+    uHtml+=upcomingEvents.map(e=>{
+      const d=new Date(e.date+'T12:00:00');
+      return `<div class="upcoming-item"><div class="upcoming-date-box"><div class="upcoming-day" style="color:${TYPE_COLORS[e.type]||'var(--gold)'}">${d.getDate()}</div><div class="upcoming-mon">${MONTHS[d.getMonth()].slice(0,3)}</div></div><div class="upcoming-info"><div class="upcoming-name">${e.name}</div><div class="upcoming-sub">${TYPE_LABELS[e.type]||e.type}${e.start?' · '+e.start:''}</div></div></div>`;
+    }).join('');
+  }
+  if(!todayEvents.length&&!upcomingEvents.length) uHtml='<p style="font-size:13px;color:var(--text3)">Sin eventos próximos</p>';
+  uEl.innerHTML=uHtml;
+
+  // Tareas: primero las de hoy, luego pendientes
+  const todayTasks=tasks.filter(t=>!t.done&&t.due===todayStr);
+  const otherTasks=tasks.filter(t=>!t.done&&t.due!==todayStr).slice(0,4);
   const tEl=document.getElementById('home-tasks-list');
-  tEl.innerHTML=pending.length?pending.map(t=>`<div class="task-item ${t.done?'done':''}" style="padding:10px 0;border-bottom:1px solid var(--border)"><div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">${t.done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div><div style="flex:1"><div class="task-label">${t.text}</div><div class="task-meta">${t.cat==='docencia'?'📚':'✍️'} ${t.cat}</div></div></div>`).join(''):'<p style="font-size:13px;color:var(--text3);padding:8px 0">¡Todo al día! 🎉</p>';
+  let tHtml='';
+  if(todayTasks.length){
+    tHtml+=`<div style="font-size:10px;color:var(--gold);letter-spacing:.07em;text-transform:uppercase;font-weight:700;padding:0 20px 8px">Para hoy</div>`;
+    tHtml+=todayTasks.map(t=>`<div class="task-item" style="border-left:2px solid var(--gold);margin:0 16px 6px;border-radius:var(--r-sm);background:var(--gold-dim);padding:10px 14px"><div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">${t.done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div><div style="flex:1"><div class="task-label">${t.text}</div><div class="task-meta">${t.cat==='docencia'?'📚':'✍️'} ${t.cat}</div></div></div>`).join('');
+  }
+  if(otherTasks.length){
+    tHtml+=`<div style="font-size:10px;color:var(--text3);letter-spacing:.07em;text-transform:uppercase;font-weight:700;padding:${todayTasks.length?'12px':'0'} 20px 8px">Pendientes</div>`;
+    tHtml+=otherTasks.map(t=>`<div class="task-item ${t.done?'done':''}" style="padding:10px 20px;border-bottom:1px solid var(--border)"><div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">${t.done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div><div style="flex:1"><div class="task-label">${t.text}</div><div class="task-meta">${t.cat==='docencia'?'📚':'✍️'} ${t.cat}</div></div></div>`).join('');
+  }
+  if(!todayTasks.length&&!otherTasks.length) tHtml='<p style="font-size:13px;color:var(--text3);padding:8px 20px">¡Todo al día! 🎉</p>';
+  tEl.innerHTML=tHtml;
 }
 
 // TASKS

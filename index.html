@@ -235,7 +235,7 @@ select option{background:var(--bg2);}
     <!-- HOME -->
     <div class="screen active" id="screen-home">
       <div style="padding:24px 20px 0">
-        <div style="font-family:var(--serif);font-size:28px;font-style:italic;color:var(--text);margin-top:3px;line-height:1.2">¡Hola Alejandro!</div>
+        <div style="font-family:var(--serif);font-size:28px;font-style:italic;color:var(--text);margin-top:3px;line-height:1.2">Alejandro</div>
         <div style="font-size:12px;color:var(--text3);margin-top:4px" id="home-date"></div>
         <div style="width:32px;height:2px;background:linear-gradient(90deg,var(--gold),transparent);margin:14px 0 20px;border-radius:1px"></div>
       </div>
@@ -261,7 +261,7 @@ select option{background:var(--bg2);}
         <div class="card" style="border-color:rgba(200,169,110,.18);background:linear-gradient(135deg,var(--bg2),rgba(200,169,110,.04))">
           <div class="card-row">
             <div class="card-icon gold">✦</div>
-            <div><div style="font-size:14px;font-weight:600;color:var(--text)">¿Cómo estamos hoy?</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
+            <div><div style="font-size:14px;font-weight:600;color:var(--text)">Asistente IA</div><div style="font-size:12px;color:var(--text3);margin-top:2px">Clases, rúbricas, escritura creativa</div></div>
           </div>
           <button class="btn btn-full" style="margin-top:8px;background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);border-radius:var(--r-sm);padding:12px;font-size:14px;font-weight:600;" onclick="verResumenHoy()">☀️ Ver resumen de hoy</button>
 
@@ -272,11 +272,12 @@ select option{background:var(--bg2);}
     <!-- TAREAS -->
     <div class="screen" id="screen-tareas">
       <div class="sh"><h2>Tareas</h2><p>Organiza tu trabajo diario</p><div class="sh-line"></div></div>
-      <div class="pills" id="filter-pills">
+      <div class="pills" id="filter-pills" style="flex-wrap:wrap;gap:6px">
         <span class="pill active" onclick="setFilter('todas',this)">Todas</span>
         <span class="pill" onclick="setFilter('docencia',this)">📚 Docencia</span>
         <span class="pill" onclick="setFilter('escritura',this)">✍️ Escritura</span>
         <span class="pill" onclick="setFilter('pendientes',this)">Pendientes</span>
+        <span class="pill" onclick="setFilter('completadas',this)">✔ Completadas</span>
       </div>
       <div id="task-list-container"></div>
     </div>
@@ -549,16 +550,44 @@ function renderHome(){
 }
 
 // TASKS
+function taskRow(t){
+  const badge = t.cat==='docencia'?'📚':'✍️';
+  const priColor = t.pri==='alta'?'var(--rose)':t.pri==='baja'?'var(--text3)':'var(--text3)';
+  const priLabel = t.pri==='alta'?'⬆ Alta':t.pri==='baja'?'⬇ Baja':'Normal';
+  const dueLabel = t.due?`<span style="font-size:10px;color:var(--text3);margin-left:6px">📅 ${t.due}</span>`:'';
+  const reminderLabel = t.reminder?`<span style="font-size:10px;color:var(--gold);margin-left:6px">🔔</span>`:'';
+  return `<div class="task-item ${t.done?'done':''}" style="position:relative">
+    <div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')" style="flex-shrink:0">
+      ${t.done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}
+    </div>
+    <div style="flex:1;min-width:0">
+      <div class="task-label" style="${t.done?'text-decoration:line-through;opacity:.5':''}">${t.text}</div>
+      <div class="task-meta" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">
+        <span style="color:${priColor}">${priLabel}</span>
+        ${dueLabel}${reminderLabel}
+      </div>
+    </div>
+    <span class="task-badge" style="margin-right:4px">${badge}</span>
+    <button onclick="deleteTaskById('${t.id}')" style="width:22px;height:22px;border-radius:50%;background:var(--bg4);border:1px solid var(--border-mid);color:var(--text3);font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Eliminar">×</button>
+  </div>`;
+}
 function renderTasks(){
   let f=tasks;
-  if(currentFilter==='docencia')f=tasks.filter(t=>t.cat==='docencia');
-  else if(currentFilter==='escritura')f=tasks.filter(t=>t.cat==='escritura');
-  else if(currentFilter==='pendientes')f=tasks.filter(t=>!t.done);
+  if(currentFilter==='docencia') f=tasks.filter(t=>t.cat==='docencia');
+  else if(currentFilter==='escritura') f=tasks.filter(t=>t.cat==='escritura');
+  else if(currentFilter==='pendientes') f=tasks.filter(t=>!t.done);
+  else if(currentFilter==='completadas') f=tasks.filter(t=>t.done);
   const el=document.getElementById('task-list-container');
-  el.innerHTML=f.length?`<div style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">`+f.map(t=>`<div class="task-item ${t.done?'done':''}"><div class="task-check ${t.done?'done':''}" onclick="toggleTask('${t.id}')">${t.done?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>':''}</div><div style="flex:1"><div class="task-label">${t.text}</div><div class="task-meta">${t.pri}</div></div><span class="task-badge">${t.cat==='docencia'?'📚':'✍️'}</span></div>`).join('')+`</div>`:'<p style="font-size:13px;color:var(--text3);padding:20px">Sin tareas aquí.</p>';
+  if(!f.length){
+    const msgs={todas:'Aún no tienes tareas.',docencia:'Sin tareas de docencia.',escritura:'Sin tareas de escritura.',pendientes:'¡Todo al día! 🎉',completadas:'Aún no has completado tareas.'};
+    el.innerHTML=`<p style="font-size:13px;color:var(--text3);padding:24px 20px">${msgs[currentFilter]||'Sin tareas aquí.'}</p>`;
+    return;
+  }
+  el.innerHTML=`<div style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">`+f.map(taskRow).join('')+`</div>`;
 }
 function setFilter(f,el){currentFilter=f;document.querySelectorAll('#filter-pills .pill').forEach(p=>p.classList.remove('active'));el.classList.add('active');renderTasks();}
 function toggleTask(id){const t=tasks.find(t=>t.id===id);if(t){t.done=!t.done;saveTasks();fsSave('task',t);renderTasks();renderHome();}}
+function deleteTaskById(id){if(!confirm('¿Eliminar esta tarea?'))return;fsDel('task',id);tasks=tasks.filter(t=>t.id!==id);saveTasks();renderTasks();renderHome();showToast('Tarea eliminada');}
 
 // CALENDAR
 function renderCalendar(){

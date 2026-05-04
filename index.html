@@ -228,6 +228,42 @@ select option{background:var(--bg2);}
 /* TOAST */
 .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(12px);background:#1a1a2e;color:#fff;font-size:12px;font-weight:600;padding:10px 22px;border-radius:99px;z-index:300;opacity:0;transition:all .25s cubic-bezier(.33,1,.68,1);pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.18);letter-spacing:.01em;}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── MODO FOCO POMODORO ── */
+#focus-screen{position:fixed;inset:0;background:linear-gradient(160deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;}
+#focus-screen.open{display:flex;}
+.focus-task-name{font-size:16px;font-weight:600;color:rgba(255,255,255,.7);text-align:center;max-width:280px;line-height:1.5;margin-bottom:8px;}
+.focus-mode-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:48px;}
+.focus-mode-label.work{color:#a29bfe;}
+.focus-mode-label.break{color:#00cec9;}
+.focus-ring{position:relative;width:230px;height:230px;margin-bottom:44px;}
+.focus-ring svg{position:absolute;inset:0;transform:rotate(-90deg);}
+.focus-ring-bg{stroke:rgba(255,255,255,.08);fill:none;}
+.focus-ring-prog{fill:none;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1),stroke .4s;}
+.focus-time{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.focus-time-text{font-size:58px;font-weight:300;color:#fff;letter-spacing:-2px;font-family:'Inter',sans-serif;line-height:1;}
+.focus-time-sub{font-size:12px;color:rgba(255,255,255,.45);margin-top:8px;letter-spacing:.06em;}
+.focus-controls{display:flex;gap:20px;align-items:center;margin-bottom:36px;}
+.focus-btn-main{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);color:#fff;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;backdrop-filter:blur(10px);}
+.focus-btn-main:active{transform:scale(.92);background:rgba(255,255,255,.2);}
+.focus-btn-sm{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.focus-btn-sm:active{transform:scale(.92);}
+.focus-sessions{display:flex;gap:8px;margin-bottom:40px;}
+.focus-session-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .3s;}
+.focus-session-dot.done{background:#a29bfe;}
+.focus-session-dot.current{background:#fff;box-shadow:0 0 10px rgba(255,255,255,.5);}
+.focus-close{font-size:12px;color:rgba(255,255,255,.4);cursor:pointer;border:none;background:none;font-family:var(--sans);letter-spacing:.04em;padding:8px 16px;border-radius:99px;border:1px solid rgba(255,255,255,.1);}
+.focus-close:active{color:rgba(255,255,255,.7);}
+/* Modal de invitación al foco */
+.focus-invite{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9998;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px);}
+.focus-invite-card{background:#1a1a2e;border:1px solid rgba(162,155,254,.2);border-radius:24px;padding:28px 24px;max-width:340px;width:100%;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.focus-invite-icon{font-size:44px;margin-bottom:16px;}
+.focus-invite-title{font-size:20px;font-weight:700;color:#fff;margin-bottom:8px;}
+.focus-invite-task{font-size:14px;color:rgba(255,255,255,.6);margin-bottom:24px;line-height:1.5;}
+.focus-invite-btns{display:flex;flex-direction:column;gap:10px;}
+.focus-invite-yes{background:#5b6af0;color:#fff;border:none;border-radius:14px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--sans);}
+.focus-invite-yes:active{transform:scale(.97);}
+.focus-invite-no{background:rgba(255,255,255,.07);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px;font-size:13px;cursor:pointer;font-family:var(--sans);}
 </style>
 </head>
 <body>
@@ -368,9 +404,52 @@ select option{background:var(--bg2);}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Notas
     </button>
+    <button class="nav-btn" id="nav-foco" onclick="openFocus(null)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      Foco
+    </button>
   </nav>
 </div>
 
+
+<!-- ── PANTALLA FOCO POMODORO ── -->
+<div id="focus-screen">
+  <div class="focus-task-name" id="focus-task-name">Tarea</div>
+  <div class="focus-mode-label work" id="focus-mode-label">Tiempo de enfoque</div>
+  <div class="focus-ring">
+    <svg width="230" height="230" viewBox="0 0 230 230">
+      <circle class="focus-ring-bg" cx="115" cy="115" r="104" stroke-width="6"/>
+      <circle class="focus-ring-prog" id="focus-ring-prog" cx="115" cy="115" r="104" stroke-width="6"
+        stroke="#a29bfe"
+        stroke-dasharray="653.5"
+        stroke-dashoffset="0"/>
+    </svg>
+    <div class="focus-time">
+      <div class="focus-time-text" id="focus-time-text">25:00</div>
+      <div class="focus-time-sub" id="focus-time-sub">ENFOQUE</div>
+    </div>
+  </div>
+  <div class="focus-sessions" id="focus-sessions"></div>
+  <div class="focus-controls">
+    <button class="focus-btn-sm" onclick="focusReset()" title="Reiniciar">↺</button>
+    <button class="focus-btn-main" id="focus-play-btn" onclick="focusToggle()">▶</button>
+    <button class="focus-btn-sm" onclick="focusSkip()" title="Saltar">⏭</button>
+  </div>
+  <button class="focus-close" onclick="closeFocus()">✕ Cerrar modo foco</button>
+</div>
+
+<!-- Modal invitación foco -->
+<div class="focus-invite" id="focus-invite" style="display:none">
+  <div class="focus-invite-card">
+    <div class="focus-invite-icon">🎯</div>
+    <div class="focus-invite-title">¿Nos concentramos?</div>
+    <div class="focus-invite-task" id="focus-invite-task"></div>
+    <div class="focus-invite-btns">
+      <button class="focus-invite-yes" onclick="startFocusFromInvite()">▶ Iniciar modo foco</button>
+      <button class="focus-invite-no" onclick="dismissFocusInvite()">Ahora no</button>
+    </div>
+  </div>
+</div>
 <!-- MODAL AGREGAR -->
 <div class="modal-overlay" id="add-modal" onclick="closeModal(event)">
   <div class="modal">
@@ -597,6 +676,7 @@ function taskRow(t){
       </div>
     </div>
     <span class="task-badge" style="margin-right:4px">${badge}</span>
+    ${!t.done ? `<button onclick="openFocus('${t.id}','${t.text.replace(/'/g,"\'")}')" style="width:28px;height:28px;border-radius:50%;background:var(--accent-soft);border:1px solid rgba(91,106,240,.2);color:var(--accent);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-right:2px" title="Modo foco">🎯</button>` : ''}
     <button onclick="deleteTaskById('${t.id}')" style="width:22px;height:22px;border-radius:50%;background:var(--bg4);border:1px solid var(--border-mid);color:var(--text3);font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0" title="Eliminar">×</button>
   </div>`;
 }
@@ -1126,17 +1206,18 @@ function scheduleTaskReminder(task) {
 }
 
 function fireTaskNotification(task) {
-  // Notificación nativa con snooze
   if (Notification && Notification.permission === 'granted') {
     const n = new Notification('🔔 ' + task.text, {
-      body: task.cat === 'docencia' ? '📚 Docencia' : '✍️ Escritura',
+      body: '¿Quieres concentrarte en esta tarea?',
       icon: 'icon-192.png',
       tag: 'task-' + task.id,
       requireInteraction: true
     });
-    n.onclick = () => { window.focus(); n.close(); };
+    n.onclick = () => { window.focus(); n.close(); showFocusInvite(task); };
   }
   showSnoozeBar(task);
+  // Mostrar invitación al foco después de un momento
+  setTimeout(() => showFocusInvite(task), 600);
 }
 
 function showSnoozeBar(task) {
@@ -1184,6 +1265,165 @@ function scheduleAllTaskReminders() {
   tasks.forEach(t => { if (!t.done && t.reminder) scheduleTaskReminder(t); });
 }
 scheduleAllTaskReminders();
+
+// ── POMODORO / MODO FOCO ──
+const POMODORO = { work: 25*60, shortBreak: 5*60, longBreak: 15*60, sessionsBeforeLong: 4 };
+let focusState = {
+  running: false, mode: 'work', timeLeft: POMODORO.work,
+  sessions: 0, interval: null, taskId: null, taskName: ''
+};
+const CIRCUM = 2 * Math.PI * 104; // 653.5
+
+function openFocus(taskId, taskName) {
+  focusState.taskId = taskId;
+  focusState.taskName = taskName || 'Sesión de foco';
+  document.getElementById('focus-task-name').textContent = focusState.taskName;
+  renderFocusSessions();
+  renderFocusTimer();
+  document.getElementById('focus-screen').classList.add('open');
+  // Mantener pantalla encendida si está disponible
+  if (navigator.wakeLock) navigator.wakeLock.request('screen').catch(()=>{});
+}
+
+function closeFocus() {
+  if (focusState.running) {
+    if (!confirm('¿Salir del modo foco? El temporizador se pausará.')) return;
+  }
+  pauseFocus();
+  document.getElementById('focus-screen').classList.remove('open');
+}
+
+function focusToggle() {
+  if (focusState.running) pauseFocus(); else startFocus();
+}
+
+function startFocus() {
+  focusState.running = true;
+  document.getElementById('focus-play-btn').textContent = '⏸';
+  focusState.interval = setInterval(() => {
+    focusState.timeLeft--;
+    renderFocusTimer();
+    if (focusState.timeLeft <= 0) onFocusPhaseEnd();
+  }, 1000);
+}
+
+function pauseFocus() {
+  focusState.running = false;
+  clearInterval(focusState.interval);
+  document.getElementById('focus-play-btn').textContent = '▶';
+}
+
+function focusReset() {
+  pauseFocus();
+  focusState.timeLeft = POMODORO[focusState.mode === 'work' ? 'work' : focusState.mode === 'shortBreak' ? 'shortBreak' : 'longBreak'];
+  renderFocusTimer();
+}
+
+function focusSkip() {
+  pauseFocus();
+  onFocusPhaseEnd();
+}
+
+function onFocusPhaseEnd() {
+  pauseFocus();
+  if (focusState.mode === 'work') {
+    focusState.sessions++;
+    renderFocusSessions();
+    const isLong = focusState.sessions % POMODORO.sessionsBeforeLong === 0;
+    focusState.mode = isLong ? 'longBreak' : 'shortBreak';
+    focusState.timeLeft = isLong ? POMODORO.longBreak : POMODORO.shortBreak;
+    playFocusSound('break');
+    showToast(isLong ? '🎉 ¡Descanso largo! 15 min' : '☕ ¡Descanso! 5 min');
+  } else {
+    focusState.mode = 'work';
+    focusState.timeLeft = POMODORO.work;
+    playFocusSound('work');
+    showToast('🎯 ¡A enfocarse! 25 min');
+  }
+  renderFocusTimer();
+  // Auto-start siguiente fase
+  setTimeout(() => { if (document.getElementById('focus-screen').classList.contains('open')) startFocus(); }, 1500);
+}
+
+function renderFocusTimer() {
+  const m = String(Math.floor(focusState.timeLeft / 60)).padStart(2, '0');
+  const s = String(focusState.timeLeft % 60).padStart(2, '0');
+  document.getElementById('focus-time-text').textContent = `${m}:${s}`;
+  const isWork = focusState.mode === 'work';
+  const total = isWork ? POMODORO.work : focusState.mode === 'shortBreak' ? POMODORO.shortBreak : POMODORO.longBreak;
+  const pct = focusState.timeLeft / total;
+  const offset = CIRCUM * (1 - pct);
+  const prog = document.getElementById('focus-ring-prog');
+  prog.style.strokeDashoffset = offset;
+  prog.style.stroke = isWork ? '#a29bfe' : '#00cec9';
+  const label = document.getElementById('focus-mode-label');
+  const sub = document.getElementById('focus-time-sub');
+  if (isWork) {
+    label.textContent = 'Tiempo de enfoque';
+    label.className = 'focus-mode-label work';
+    sub.textContent = 'ENFOQUE';
+  } else if (focusState.mode === 'shortBreak') {
+    label.textContent = 'Descanso corto ☕';
+    label.className = 'focus-mode-label break';
+    sub.textContent = 'DESCANSO';
+  } else {
+    label.textContent = '¡Gran descanso! 🎉';
+    label.className = 'focus-mode-label break';
+    sub.textContent = 'DESCANSO LARGO';
+  }
+  // Título de pestaña
+  if (document.getElementById('focus-screen').classList.contains('open')) {
+    document.title = `${m}:${s} — ${isWork ? '🎯 Enfoque' : '☕ Descanso'}`;
+  } else {
+    document.title = 'Asistente Personal';
+  }
+}
+
+function renderFocusSessions() {
+  const total = POMODORO.sessionsBeforeLong;
+  const cur = focusState.sessions % total;
+  let html = '';
+  for (let i = 0; i < total; i++) {
+    const cls = i < cur ? 'done' : i === cur && focusState.mode === 'work' ? 'current' : '';
+    html += `<div class="focus-session-dot ${cls}"></div>`;
+  }
+  document.getElementById('focus-sessions').innerHTML = html;
+}
+
+function playFocusSound(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.frequency.value = type === 'work' ? 528 : 396;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 1.2);
+  } catch(e) {}
+}
+
+// Invitación desde notificación
+let focusInviteTaskId = null;
+function showFocusInvite(task) {
+  focusInviteTaskId = task.id;
+  document.getElementById('focus-invite-task').textContent = task.text;
+  document.getElementById('focus-invite').style.display = 'flex';
+}
+function dismissFocusInvite() {
+  document.getElementById('focus-invite').style.display = 'none';
+  focusInviteTaskId = null;
+}
+function startFocusFromInvite() {
+  const task = tasks.find(t => t.id === focusInviteTaskId);
+  dismissFocusInvite();
+  dismissSnooze();
+  if (task) openFocus(task.id, task.text);
+}
+
 function scheduleMorningReminder() {
   const now = new Date();
   const day = now.getDay(); // 0=dom, 6=sab
